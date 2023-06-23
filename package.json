@@ -1,0 +1,21 @@
+{
+  "name": "nodejs-file-manager",
+  "version": "1.0.0",
+  "description": "Implement File Manager using Node.js APIs",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slava1000uk/nodejs-file-manager.git"
+  },
+  "author": "slava1000uk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/slava1000uk/nodejs-file-manager/issues"
+  },
+  "homepage": "https://github.com/slava1000uk/nodejs-file-manager#readme"
+}
