@@ -1,4 +1,5 @@
 import  process  from 'node:process';
+import  path  from 'node:path';
 import { dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Transform } from 'node:stream';
@@ -9,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 let username = '';
 
-// here is tha path to directory initialization from the very beginning
+// path to directory initialization from the very beginning
 let PATH_TO_WORKING_DIRECTORY = dirname(process.argv[1]);
 
 const welcomeUsername = () => {
@@ -53,8 +54,8 @@ const list = async () => {
   }
 };
 
-const goUp = async() => {
-
+const goUp = () => {
+  PATH_TO_WORKING_DIRECTORY = path.dirname(PATH_TO_WORKING_DIRECTORY);
 };
 
 
@@ -68,7 +69,7 @@ const parseInputToAction = async (chunk) => {
       break;
 
     case 'up\n':
-      await goUp();
+      goUp();
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
