@@ -8,7 +8,9 @@ import { statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 let username = '';
-let pathToWorkingDirectory = dirname(process.argv[1]);
+
+// here is tha path to directory initialization from the very beginning
+let PATH_TO_WORKING_DIRECTORY = dirname(process.argv[1]);
 
 const welcomeUsername = () => {
   const arg = process.argv.slice(2);
@@ -20,7 +22,7 @@ const welcomeUsername = () => {
   });
 
   console.log(`Welcome to the File Manager, ${username}!\n`);
-  console.log(`You are currently in ${pathToWorkingDirectory}`);
+  console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
     
 };
 
@@ -33,15 +35,13 @@ const isFile = (path, file) => {
 };
 
 const list = async () => {
-  const pathToFile = fileURLToPath(import.meta.url);
-  pathToWorkingDirectory = dirname(pathToFile);
 
   try {
-    let files = await readdir(pathToWorkingDirectory);
+    let files = await readdir(PATH_TO_WORKING_DIRECTORY);
 
     let classifiedPathes = 
       files.map(file => {
-          let answer = isFile(pathToWorkingDirectory, file);
+        let answer = isFile(PATH_TO_WORKING_DIRECTORY, file);
 
           return answer ? [file, 'file'] : [file, 'folder'];
       });
@@ -53,16 +53,27 @@ const list = async () => {
   }
 };
 
+const goUp = async() => {
+
+};
+
+
 const parseInputToAction = async (chunk) => {
   let output = '';
 
   switch (chunk) {
     case 'ls\n':
       await list();
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'up\n':
+      await goUp();
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
     case 'os --EOL\n':
-      output = os.EOL;
+      output = JSON.stringify(os.EOL) + '\n';
       break;
 
     case 'os --cpus\n':
@@ -95,9 +106,7 @@ const run = async () => {
    transform(chunk, _, callback) {
       
       parseInputToAction(chunk.toString()).then(output => this.push(output));
-      
-      // let output = 
-      // this.push(output);
+
       callback();
     }
   });
