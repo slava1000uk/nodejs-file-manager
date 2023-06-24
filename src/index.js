@@ -1,7 +1,11 @@
 import  process  from 'node:process';
-import { dirname } from 'node:path';
-import { Transform, pipeline } from 'node:stream';
+import { dirname, join } from 'node:path';
+import { pipeline } from 'node:stream/promises';
+import { Transform } from 'node:stream';
 import  os  from 'node:os';
+import { readdir } from 'node:fs/promises';
+import { statSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 let username = '';
 let pathToWorkingDirectory = dirname(process.argv[1]);
@@ -20,17 +24,42 @@ const welcomeUsername = () => {
     
 };
 
+const isFile = (path, file) => {
+ 
+  const pathToTargetFile = join(path, file);
+  let answer = statSync(pathToTargetFile).isFile();
 
+  return answer;
+};
 
-const parseInputToAction = (chunk) => {
+const list = async () => {
+  const pathToFile = fileURLToPath(import.meta.url);
+  pathToWorkingDirectory = dirname(pathToFile);
+
+  try {
+    let files = await readdir(pathToWorkingDirectory);
+
+    let classifiedPathes = 
+      files.map(file => {
+          let answer = isFile(pathToWorkingDirectory, file);
+
+          return answer ? [file, 'file'] : [file, 'folder'];
+      });
+
+    console.table(classifiedPathes);
+
+  } catch (err) {
+    console.error('FS operation failed');
+  }
+};
+
+const parseInputToAction = async (chunk) => {
   let output = '';
 
   switch (chunk) {
-    // case 'ls\n':
-    //  list();
-
-
-    //   break;
+    case 'ls\n':
+      await list();
+      break;
 
     case 'os --EOL\n':
       output = os.EOL;
@@ -53,29 +82,31 @@ const parseInputToAction = (chunk) => {
 
 
 const run = async () => {
-  welcomeUsername();
-
-  const inputTransformToOutput = new Transform({
-
-    transform(chunk, _, callback) {
-      let output = parseInputToAction(chunk.toString()); // it's better tu use os.EOL for new line
-      this.push(output);
-      callback();
-    }
-  });
-
-  pipeline(
-    process.stdin,
-    inputTransformToOutput,
-    process.stdout,
-    (err) => console.error(err.message));
-
-
   //display text in the console After program work finished ctrl + c pressed  
   process.on('SIGINT', function () {
     console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
     process.exit(0);
   });
+
+  welcomeUsername();
+
+  const inputTransformToOutput = new Transform({
+
+   transform(chunk, _, callback) {
+      
+      parseInputToAction(chunk.toString()).then(output => this.push(output));
+      
+      // let output = 
+      // this.push(output);
+      callback();
+    }
+  });
+
+  await pipeline(
+    process.stdin,
+    inputTransformToOutput,
+    process.stdout
+  );
 }
 
 await run();
