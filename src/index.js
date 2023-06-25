@@ -17,7 +17,7 @@ const welcomeUsername = () => {
   const arg = process.argv.slice(2);
   
   arg.forEach((item) => {
-    if (item.includes('usernsme')) {
+    if (item.includes('username')) {
       username = item.slice(11);
     }
   });
@@ -40,35 +40,29 @@ const list = async () => {
   try {
     let dirEnteties = await readdir(PATH_TO_WORKING_DIRECTORY, {withFileTypes: true});
 
-    let classifiedPathes = 
+    let sortedPathes = 
       dirEnteties
       .map(entety => entety.isFile() ? { Name: entety.name, Type: 'File' } : { Name: entety.name, Type: 'Directory' })
-        .sort(compareName)
-        .sort(compareType);
+      .sort(compareName)
+      .sort(compareType);
 
-
-
-      //   let answer = isFile(PATH_TO_WORKING_DIRECTORY, file);
-
-      //     return answer ? [file, 'file'] : [file, 'directory'];
-      // });
-
-    console.table(classifiedPathes);
+    console.table(sortedPathes);
 
   } catch (err) {
-    console.error('FS operation failed');
+    console.error(err);
   }
 };
 
 const goUp = () => {
   PATH_TO_WORKING_DIRECTORY = path.dirname(PATH_TO_WORKING_DIRECTORY);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
 };
 
 const goToDirectory = (chunk) => {
   let path_to_directory = chunk.slice(2).trim();
-  
-  // check if is it a directory?
-  // absolute or relative?
+
+  PATH_TO_WORKING_DIRECTORY = path.resolve(path_to_directory);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
 };
 
 
