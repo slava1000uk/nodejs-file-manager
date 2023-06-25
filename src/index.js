@@ -27,25 +27,31 @@ const welcomeUsername = () => {
     
 };
 
-const isFile = (path, file) => {
- 
-  const pathToTargetFile = join(path, file);
-  let answer = statSync(pathToTargetFile).isFile();
+const compareName = (item1, item2) => item1.Name > item2.Name ? 1 : -1;
 
-  return answer;
+const compareType = (item1, item2) => {
+  if (item1.Type === 'File' && item2.Type === 'Directory' ) { return 1 };
+  if (item1.Type === 'Directory' && item2.Type === 'File') { return -1 };
+  if (item1.Type === item2.Type ) { return 0 };
 };
 
 const list = async () => {
 
   try {
-    let files = await readdir(PATH_TO_WORKING_DIRECTORY);
+    let dirEnteties = await readdir(PATH_TO_WORKING_DIRECTORY, {withFileTypes: true});
 
     let classifiedPathes = 
-      files.map(file => {
-        let answer = isFile(PATH_TO_WORKING_DIRECTORY, file);
+      dirEnteties
+      .map(entety => entety.isFile() ? { Name: entety.name, Type: 'File' } : { Name: entety.name, Type: 'Directory' })
+        .sort(compareName)
+        .sort(compareType);
 
-          return answer ? [file, 'file'] : [file, 'folder'];
-      });
+
+
+      //   let answer = isFile(PATH_TO_WORKING_DIRECTORY, file);
+
+      //     return answer ? [file, 'file'] : [file, 'directory'];
+      // });
 
     console.table(classifiedPathes);
 
@@ -56,6 +62,13 @@ const list = async () => {
 
 const goUp = () => {
   PATH_TO_WORKING_DIRECTORY = path.dirname(PATH_TO_WORKING_DIRECTORY);
+};
+
+const goToDirectory = (chunk) => {
+  let path_to_directory = chunk.slice(2).trim();
+  
+  // check if is it a directory?
+  // absolute or relative?
 };
 
 
@@ -70,6 +83,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'up\n':
       goUp();
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'cd' + chunk.slice(2):
+      goToDirectory(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
