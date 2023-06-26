@@ -357,6 +357,10 @@ const parseInputToAction = async (chunk) => {
       output = JSON.stringify(os.cpus())+'\n';
       break;
     
+    case 'os --homedir\n':
+      output = os.homedir() + '\n';
+      break;
+    
     case '.exit\n':
       console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
       process.exit(0);;
