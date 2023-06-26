@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Transform } from 'node:stream';
 import  os  from 'node:os';
-import { readdir, readFile, writeFile, rm } from 'node:fs/promises';
+import { readdir, readFile, writeFile, rm, rename } from 'node:fs/promises';
 import { statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -126,6 +126,25 @@ const deleteFile = async (chunk) => {
 };
 
 
+const renameFile = async (chunk) => {
+  const [path_to_oldfile, new_filename] = chunk.slice(2).trim().split(' ');
+  
+  const absolute_path_to_oldfile = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_oldfile);
+
+  PATH_TO_WORKING_DIRECTORY = path.dirname(absolute_path_to_oldfile);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
+
+  const absolute_path_to_newfile = path.resolve(PATH_TO_WORKING_DIRECTORY, new_filename);
+
+  try {
+    await rename(absolute_path_to_oldfile, absolute_path_to_newfile);
+
+  } catch (error) {
+    console.error('Rename file operation failed!');
+  }
+};
+
+
 const parseInputToAction = async (chunk) => {
   let output = '';
 
@@ -157,6 +176,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'rm' + chunk.slice(2):
       await deleteFile(chunk);
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'rn' + chunk.slice(2):
+      await renameFile(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
