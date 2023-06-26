@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Transform } from 'node:stream';
 import  os  from 'node:os';
-import { readdir, readFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -82,6 +82,19 @@ const printFileToConsole = async (chunk) => {
 
 };
 
+const addFile = async (chunk) => {
+  const data = '';
+  
+  const fileName = chunk.slice(3).trim();
+  const filePath = join(PATH_TO_WORKING_DIRECTORY, fileName);
+  
+  try {
+    await writeFile(filePath, data, { flag: 'wx' });
+  } catch (err) {
+    console.error('Add new file operation failed');
+  }
+};
+
 
 const parseInputToAction = async (chunk) => {
   let output = '';
@@ -104,6 +117,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'cat' + chunk.slice(3):
       await printFileToConsole(chunk);
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'add' + chunk.slice(3):
+      await addFile(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
