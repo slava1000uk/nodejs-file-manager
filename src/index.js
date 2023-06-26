@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Transform } from 'node:stream';
 import  os  from 'node:os';
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -12,6 +12,9 @@ let username = '';
 
 // path to directory initialization from the very beginning
 let PATH_TO_WORKING_DIRECTORY = dirname(process.argv[1]);
+
+
+
 
 const welcomeUsername = () => {
   const arg = process.argv.slice(2);
@@ -26,6 +29,9 @@ const welcomeUsername = () => {
   console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
     
 };
+
+
+
 
 const compareName = (item1, item2) => item1.Name.toLowerCase() > item2.Name.toLowerCase() ? 1 : -1;
 
@@ -66,6 +72,8 @@ const goToDirectory = (chunk) => {
 
 };
 
+
+
 const printFileToConsole = async (chunk) => {
   const path_to_file = chunk.slice(3).trim();
   const absolute_path_to_file = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_file);
@@ -82,16 +90,38 @@ const printFileToConsole = async (chunk) => {
 
 };
 
+
+
+
+
 const addFile = async (chunk) => {
   const data = '';
   
   const fileName = chunk.slice(3).trim();
   const filePath = join(PATH_TO_WORKING_DIRECTORY, fileName);
-  
+
   try {
     await writeFile(filePath, data, { flag: 'wx' });
   } catch (err) {
-    console.error('Add new file operation failed');
+    console.error('Add new file operation failed!');
+  }
+};
+
+
+
+const deleteFile = async (chunk) => {
+  const path_to_file = chunk.slice(2).trim();
+
+  const absolute_path_to_file = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_file);
+
+  PATH_TO_WORKING_DIRECTORY = path.dirname(absolute_path_to_file);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
+
+  try {
+    await rm(absolute_path_to_file);
+
+  } catch (err) {
+    console.error('Delete file operation failed!');
   }
 };
 
@@ -122,6 +152,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'add' + chunk.slice(3):
       await addFile(chunk);
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'rm' + chunk.slice(2):
+      await deleteFile(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
