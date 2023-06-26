@@ -7,6 +7,7 @@ import  os  from 'node:os';
 import { readdir, readFile, writeFile, rm, rename, copyFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { createWriteStream, createReadStream } from 'node:fs';
+import zlib from 'node:zlib';
 
 
 let username = '';
@@ -208,6 +209,33 @@ const moveFileTo = async (chunk) => {
 };
 
 
+const compressFileTo = (chunk) => {
+  const [path_to_file, path_to_destination] = chunk.slice(8).trim().split(' ');
+
+
+  const absolute_path_to_file = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_file);
+  const absolute_path_to_destination = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_destination);
+
+  PATH_TO_WORKING_DIRECTORY = path.dirname(absolute_path_to_file);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
+
+  
+ 
+
+  try {
+    const readStream = createReadStream(absolute_path_to_file);
+    const brotli = zlib.createBrotliCompress();
+    const writeStream = createWriteStream(absolute_path_to_destination);
+
+    readStream.pipe(brotli).pipe(writeStream);
+
+
+  } catch {
+    console.log('The file could not be compressed!');
+  }
+
+};
+
 
 
 const parseInputToAction = async (chunk) => {
@@ -256,6 +284,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'mv' + chunk.slice(2):
       await moveFileTo(chunk);
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'compress' + chunk.slice(8):
+      compressFileTo(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
