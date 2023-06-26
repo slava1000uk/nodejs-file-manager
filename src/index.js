@@ -8,6 +8,7 @@ import { readdir, readFile, writeFile, rm, rename, copyFile } from 'node:fs/prom
 import { constants } from 'node:fs';
 import { createWriteStream, createReadStream } from 'node:fs';
 import zlib from 'node:zlib';
+import { createHash } from 'node:crypto';
 
 
 let username = '';
@@ -262,6 +263,28 @@ const decompressFileTo = (chunk) => {
 
 
 
+const hashFile = async (chunk) => {
+  const path_to_file = chunk.slice(4).trim();
+
+  const absolute_path_to_file = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_file);
+
+  PATH_TO_WORKING_DIRECTORY = path.dirname(absolute_path_to_file);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
+  
+  
+  try {
+    const content = await readFile(absolute_path_to_file);
+
+    let hash = createHash('SHA256').update(content);
+    console.log(hash.digest('hex') + '\n');
+
+  } catch (err) {
+    console.error('Hash file operation failed!');
+  }
+};
+
+
+
 const parseInputToAction = async (chunk) => {
   let output = '';
 
@@ -318,6 +341,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'decompress' + chunk.slice(10):
       decompressFileTo(chunk);
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'hash' + chunk.slice(4):
+      await hashFile(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
