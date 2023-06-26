@@ -169,11 +169,45 @@ const copyFileTo = async (chunk) => {
 
     readStream.pipe(writeStream);
 
+
   } catch {
     console.log('The file could not be copied');
   }
 
 };
+
+
+
+const moveFileTo = async (chunk) => {
+  const [path_to_file, path_to_new_directory] = chunk.slice(2).trim().split(' ');
+
+
+  const absolute_path_to_file = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_file);
+  const file_name = path.basename(absolute_path_to_file);
+
+  PATH_TO_WORKING_DIRECTORY = path.dirname(absolute_path_to_file);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
+
+  const absolute_path_to_new_directory = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_new_directory);
+  const absolute_path_to_new_file = join(absolute_path_to_new_directory, file_name);
+
+  try {
+    // await copyFile(absolute_path_to_file, absolute_path_to_new_file, constants.COPYFILE_EXCL);
+
+    const readStream = createReadStream(absolute_path_to_file);
+    const writeStream = createWriteStream(absolute_path_to_new_file);
+
+    readStream.pipe(writeStream);
+
+    await rm(absolute_path_to_file);
+
+  } catch {
+    console.log('The file could not be moved!');
+  }
+
+};
+
+
 
 
 const parseInputToAction = async (chunk) => {
@@ -217,6 +251,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'cp' + chunk.slice(2):
       await copyFileTo(chunk);
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'mv' + chunk.slice(2):
+      await moveFileTo(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
