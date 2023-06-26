@@ -4,9 +4,10 @@ import { dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Transform } from 'node:stream';
 import  os  from 'node:os';
-import { readdir, readFile, writeFile, rm, rename } from 'node:fs/promises';
-import { statSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { readdir, readFile, writeFile, rm, rename, copyFile } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { createWriteStream, createReadStream } from 'node:fs';
+
 
 let username = '';
 
@@ -126,6 +127,8 @@ const deleteFile = async (chunk) => {
 };
 
 
+
+
 const renameFile = async (chunk) => {
   const [path_to_oldfile, new_filename] = chunk.slice(2).trim().split(' ');
   
@@ -142,6 +145,34 @@ const renameFile = async (chunk) => {
   } catch (error) {
     console.error('Rename file operation failed!');
   }
+};
+
+
+const copyFileTo = async (chunk) => {
+  const [path_to_file, path_to_new_directory] = chunk.slice(2).trim().split(' ');
+  
+  
+  const absolute_path_to_file = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_file);
+  const file_name = path.basename(absolute_path_to_file);
+
+  PATH_TO_WORKING_DIRECTORY = path.dirname(absolute_path_to_file);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
+
+  const absolute_path_to_new_directory = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_new_directory);
+  const absolute_path_to_new_file = join(absolute_path_to_new_directory, file_name);
+
+  try {
+    // await copyFile(absolute_path_to_file, absolute_path_to_new_file, constants.COPYFILE_EXCL);
+
+    const readStream = createReadStream(absolute_path_to_file);
+    const writeStream = createWriteStream(absolute_path_to_new_file);
+
+    readStream.pipe(writeStream);
+
+  } catch {
+    console.log('The file could not be copied');
+  }
+
 };
 
 
@@ -181,6 +212,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'rn' + chunk.slice(2):
       await renameFile(chunk);
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'cp' + chunk.slice(2):
+      await copyFileTo(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
