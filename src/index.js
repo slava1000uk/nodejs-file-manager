@@ -354,7 +354,11 @@ const parseInputToAction = async (chunk) => {
       break;
 
     case 'os --cpus\n':
-      output = JSON.stringify(os.cpus())+'\n';
+      console.log('Overall amount of CPUS: ' + os.cpus().length + '\n');
+      console.log(os.cpus().map(cpu => { 
+        return { model: cpu.model.split(' ').shift(), clockrate: cpu.model.split(' ').pop() }
+        })
+      );
       break;
     
     case 'os --homedir\n':
