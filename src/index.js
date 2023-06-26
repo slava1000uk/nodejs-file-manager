@@ -9,6 +9,7 @@ import { constants } from 'node:fs';
 import { createWriteStream, createReadStream } from 'node:fs';
 import zlib from 'node:zlib';
 import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
 
 
 let username = '';
@@ -76,9 +77,13 @@ const goToDirectory = (chunk) => {
   let path_to_directory = chunk.slice(2).trim();
 
   try {
-    PATH_TO_WORKING_DIRECTORY = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_directory);
-    process.chdir(PATH_TO_WORKING_DIRECTORY);
-
+    const PATH_TO_DIRECTORY = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_directory);
+    
+    if (existsSync(PATH_TO_DIRECTORY)) {
+      PATH_TO_WORKING_DIRECTORY = PATH_TO_DIRECTORY;
+      process.chdir(PATH_TO_WORKING_DIRECTORY);
+    } else { throw new Error(); }
+    
   } catch (error) {
     console.error('cd operation failed!');
   }
