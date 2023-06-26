@@ -350,7 +350,7 @@ const parseInputToAction = async (chunk) => {
       break;
 
     case 'os --EOL\n':
-      output = JSON.stringify(os.EOL) + '\n';
+      output = os.EOL + '\n';
       break;
 
     case 'os --cpus\n':
@@ -363,6 +363,10 @@ const parseInputToAction = async (chunk) => {
 
     case 'os --architecture\n':
       output = os.arch() + '\n';
+      break;
+
+    case 'os --username\n':
+      output = os.hostname() + '\n';
       break;
     
     case '.exit\n':
