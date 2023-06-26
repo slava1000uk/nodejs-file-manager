@@ -327,7 +327,12 @@ const parseInputToAction = async (chunk) => {
 
     case 'os --cpus\n':
       output = JSON.stringify(os.cpus())+'\n';
-      break;  
+      break;
+    
+    case '.exit\n':
+      console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
+      process.exit(0);;
+      break;
   
     default:
       output = 'Invalid input\n'; 
