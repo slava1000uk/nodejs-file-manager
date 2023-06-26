@@ -63,15 +63,25 @@ const list = async () => {
 };
 
 const goUp = () => {
-  PATH_TO_WORKING_DIRECTORY = path.dirname(PATH_TO_WORKING_DIRECTORY);
-  process.chdir(PATH_TO_WORKING_DIRECTORY);
+  try {
+    PATH_TO_WORKING_DIRECTORY = path.dirname(PATH_TO_WORKING_DIRECTORY);
+    process.chdir(PATH_TO_WORKING_DIRECTORY);
+    
+  } catch (error) {
+    console.error('up operation failed!');
+  }
 };
 
 const goToDirectory = (chunk) => {
   let path_to_directory = chunk.slice(2).trim();
-  
-  PATH_TO_WORKING_DIRECTORY = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_directory);
-  process.chdir(PATH_TO_WORKING_DIRECTORY);
+
+  try {
+    PATH_TO_WORKING_DIRECTORY = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_directory);
+    process.chdir(PATH_TO_WORKING_DIRECTORY);
+
+  } catch (error) {
+    console.error('cd operation failed!');
+  }
 
 };
 
@@ -88,7 +98,7 @@ const printFileToConsole = async (chunk) => {
     const content = await readFile(absolute_path_to_file);
     console.log(content.toString() + '\n');
   } catch (err) {
-    console.error(err);
+    console.error('Print file operation failed!');
   }
 
 };
