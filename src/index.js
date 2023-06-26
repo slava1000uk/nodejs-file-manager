@@ -220,8 +220,6 @@ const compressFileTo = (chunk) => {
   process.chdir(PATH_TO_WORKING_DIRECTORY);
 
   
- 
-
   try {
     const readStream = createReadStream(absolute_path_to_file);
     const brotli = zlib.createBrotliCompress();
@@ -232,6 +230,32 @@ const compressFileTo = (chunk) => {
 
   } catch {
     console.log('The file could not be compressed!');
+  }
+
+};
+
+
+const decompressFileTo = (chunk) => {
+  const [path_to_file, path_to_destination] = chunk.slice(10).trim().split(' ');
+
+
+  const absolute_path_to_file = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_file);
+  const absolute_path_to_destination = path.resolve(PATH_TO_WORKING_DIRECTORY, path_to_destination);
+
+  PATH_TO_WORKING_DIRECTORY = path.dirname(absolute_path_to_file);
+  process.chdir(PATH_TO_WORKING_DIRECTORY);
+
+
+  try {
+    const readStream = createReadStream(absolute_path_to_file);
+    const brotli = zlib.createBrotliDecompress();
+    const writeStream = createWriteStream(absolute_path_to_destination);
+
+    readStream.pipe(brotli).pipe(writeStream);
+
+
+  } catch {
+    console.log('The file could not be decompressed!');
   }
 
 };
@@ -289,6 +313,11 @@ const parseInputToAction = async (chunk) => {
 
     case 'compress' + chunk.slice(8):
       compressFileTo(chunk);
+      console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
+      break;
+
+    case 'decompress' + chunk.slice(10):
+      decompressFileTo(chunk);
       console.log(`You are currently in ${PATH_TO_WORKING_DIRECTORY}`);
       break;
 
