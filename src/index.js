@@ -360,6 +360,10 @@ const parseInputToAction = async (chunk) => {
     case 'os --homedir\n':
       output = os.homedir() + '\n';
       break;
+
+    case 'os --architecture\n':
+      output = os.arch() + '\n';
+      break;
     
     case '.exit\n':
       console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
